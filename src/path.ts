@@ -14,11 +14,11 @@ const toError = (
 /**
  * Similar to the Unix basename command.
  * Often used to extract the file name from a fully qualified path.
- * NOTE: A TypeError is thrown if path is not a string or if ext is given and is not a string. 
+ * @see https://nodejs.org/api/path.html#pathbasenamepath-ext
  * 
  * @param p The path to evaluate.
  * @param ext An optional file extension to remove from the result.
- * @returns The last portion of a path.
+ * @returns IOEither that yields the last portion of a path or fails yielding an error.
  */
 export const basename = (
 	p: string,
@@ -31,10 +31,10 @@ export const basename = (
 /**
  * Similar to the Unix dirname command.
  * Trailing directory separators are ignored.
- * NOTE: A TypeError is thrown if path is not a string. 
+ * @see https://nodejs.org/api/path.html#pathdirnamepath
  * 
  * @param p The path to evaluate.
- * @returns The directory name of a path.
+ * @returns IOEither that yields the directory name of a path or fails yielding an error.
  */
 export const dirname = (
 	p: string
@@ -49,10 +49,10 @@ export const dirname = (
  * If there is no . in the last portion of the path,
  * or if there are no . characters other than the first character of the basename of path,
  * an empty string is returned.
- * NOTE: A TypeError is thrown if path is not a string.
+ * @see https://nodejs.org/api/path.html#pathextnamepath
  * 
  * @param p The path to evaluate.
- * @returns The extension of the path.
+ * @returns IOEither that yields the extension of the path or fails yielding an error.
  */
 export const extname = (
 	p: string
@@ -66,9 +66,10 @@ export const extname = (
  * When providing properties to the pathObject remember that there are combinations where one property has priority over another:
  * pathObject.root is ignored if pathObject.dir is provided,
  * pathObject.ext and pathObject.name are ignored if pathObject.base exists.
+ * @see https://nodejs.org/api/path.html#pathformatpathobject
  * 
  * @param po JavaScript object with the properties: dir, root, base, name, and ext.
- * @returns Path string from an object.
+ * @returns IOEither that yields the path string from an object or fails yielding an error.
  */
 export const format = (
 	po: path.FormatInputPathObject
@@ -83,8 +84,7 @@ export const format = (
  * @see https://nodejs.org/api/path.html#pathisabsolutepath
  * 
  * @param p Path to test.
- * @returns Boolean representing if the path is an absolute path.
- * @throws TypeError if path is not a string.
+ * @returns IOEither that yields a boolean representing if the path is absolute or fails yielding an error.
  */
 export const isAbsolute = (
 	p: string
@@ -102,8 +102,7 @@ export const isAbsolute = (
  * @see https://nodejs.org/api/path.html#pathjoinpaths
  * 
  * @param paths A sequence of path segments.
- * @returns The joined path.
- * @throws TypeError if any of the path segments is not a string.
+ * @returns IOEither that yields the joined path or fails yielding an error.
  */
 export const join = (
 	...paths: string[]
@@ -122,8 +121,7 @@ export const join = (
  * @see https://nodejs.org/api/path.html#pathnormalizepath
  * 
  * @param p String path to normalize.
- * @returns Normalized string path.
- * @throws TypeError if path is not a string.
+ * @returns IOEither that yields the normalized string path or fails yielding an error.
  */
 export const normalize = (
 	p: string
@@ -138,8 +136,7 @@ export const normalize = (
  * @see https://nodejs.org/api/path.html#pathparsepath
  * 
  * @param p Path to evaluate.
- * @returns Object whose properties represent significant elements of the path.
- * @throws TypeError if path is not a string.
+ * @returns IOEither that yields an object whose properties represent significant elements of the path or fails yielding an error.
  */
 export const parse = (
 	p: string
@@ -161,8 +158,7 @@ export const parse = (
  * 
  * @param from Source path.
  * @param to Destination path.
- * @returns The relative path from {from} to {to}.
- * @throws TypeError if either from or to is not a string.
+ * @returns IOEither that yields the relative path from {from} to {to} or fails yielding an error.
  */
 export const relative = (
 	from: string,
@@ -186,8 +182,7 @@ export const relative = (
  * @see https://nodejs.org/api/path.html#pathresolvepaths
  * 
  * @param paths A sequence of path or path segment strings to join.
- * @returns An absolute path.
- * @throws TypeError if any of the arguments is not a string.
+ * @returns IOEither that yields an absolute path or fails yielding an error.
  */
 export const resolve = (
 	...paths: string[]
