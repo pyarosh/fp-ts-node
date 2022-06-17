@@ -1,0 +1,26 @@
+{
+  "name": "fp-ts-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pyarosh/fp-ts-node.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pyarosh/fp-ts-node/issues"
+  },
+  "homepage": "https://github.com/pyarosh/fp-ts-node#readme",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "fp-ts": "^2.12.1"
+  }
+}
