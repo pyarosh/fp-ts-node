@@ -3,6 +3,11 @@ import path from 'path';
 
 type Path = string;
 
+const toError = (
+	error: unknown,
+	defaultMessage: string
+) => error instanceof Error ? error : Error(defaultMessage);
+
 /**
  * Similar to the Unix basename command.
  * Often used to extract the file name from a fully qualified path.
@@ -18,3 +23,18 @@ export function basename(p: string, ext?: string): IOEither<Error, Path> {
 		(reason: unknown) => (reason instanceof Error ? reason : Error("Unexpected error getting basename"))
 	);
 }
+
+/**
+ * Similar to the Unix dirname command.
+ * Trailing directory separators are ignored.
+ * NOTE: A TypeError is thrown if path is not a string. 
+ * 
+ * @param p The path to evaluate.
+ * @returns The directory name of a path.
+ */
+export const dirname = (
+	p: string
+): IOEither<Error, Path> => tryCatch(
+	() => path.dirname(p),
+	(reason: unknown) => toError(reason, "Unexpected error getting dirname")
+);
