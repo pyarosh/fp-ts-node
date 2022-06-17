@@ -60,3 +60,19 @@ export const extname = (
 	() => path.extname(p),
 	(reason: unknown) => toError(reason, "Unexpected error getting extname")
 );
+
+/**
+ * This is the opposite of path.parse().
+ * When providing properties to the pathObject remember that there are combinations where one property has priority over another:
+ * pathObject.root is ignored if pathObject.dir is provided,
+ * pathObject.ext and pathObject.name are ignored if pathObject.base exists.
+ * 
+ * @param po JavaScript object with the properties: dir, root, base, name, and ext.
+ * @returns Path string from an object.
+ */
+export const format = (
+	po: path.FormatInputPathObject
+): IOEither<Error, Path> => tryCatch(
+	() => path.format(po),
+	(reason: unknown) => toError(reason, "Unexpected error formatting path object")
+);
