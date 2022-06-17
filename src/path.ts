@@ -1,5 +1,8 @@
-import { IOEither, tryCatch } from 'fp-ts/lib/IOEither';
 import path from 'path';
+import {
+	IOEither,
+	tryCatch
+} from 'fp-ts/lib/IOEither';
 
 type Path = string;
 
@@ -11,18 +14,19 @@ const toError = (
 /**
  * Similar to the Unix basename command.
  * Often used to extract the file name from a fully qualified path.
+ * NOTE: A TypeError is thrown if path is not a string or if ext is given and is not a string. 
  * 
- * @param p The path to evaluate
- * @param ext An optional file extension to remove from the result
- * @returns The last portion of a path
+ * @param p The path to evaluate.
+ * @param ext An optional file extension to remove from the result.
+ * @returns The last portion of a path.
  */
-export function basename(p: string, ext?: string): IOEither<Error, Path> {
-	// NOTE: A TypeError is thrown if path is not a string or if ext is given and is not a string.
-	return tryCatch(
-		() => path.basename(p, ext),
-		(reason: unknown) => (reason instanceof Error ? reason : Error("Unexpected error getting basename"))
-	);
-}
+export const basename = (
+	p: string,
+	ext?: string
+): IOEither<Error, Path> => tryCatch(
+	() => path.basename(p, ext),
+	(reason: unknown) => toError(reason, "Unexpected error getting basename")
+);
 
 /**
  * Similar to the Unix dirname command.
