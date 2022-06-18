@@ -18,9 +18,10 @@
   "homepage": "https://github.com/pyarosh/fp-ts-node#readme",
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "fp-ts": "^2.12.1",
     "typescript": "^4.7.3"
   },
-  "dependencies": {
+  "peerDependencies": {
     "fp-ts": "^2.12.1"
   }
 }
