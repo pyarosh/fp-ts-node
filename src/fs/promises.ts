@@ -1,16 +1,41 @@
-import { BigIntStats, CopyOptions, Dir, Dirent, MakeDirectoryOptions, Mode, ObjectEncodingOptions, OpenDirOptions, OpenMode, PathLike, RmDirOptions, RmOptions, StatOptions, Stats, WatchOptions } from 'node:fs';
+import {
+	BigIntStats,
+	CopyOptions,
+	Dir,
+	Dirent,
+	MakeDirectoryOptions,
+	Mode,
+	ObjectEncodingOptions,
+	OpenDirOptions,
+	OpenMode,
+	PathLike,
+	RmDirOptions,
+	RmOptions,
+	StatOptions,
+	Stats
+} from 'node:fs';
 import * as fsPromises from 'node:fs/promises';
-import { FileHandle, FlagAndOpenMode } from 'node:fs/promises';
-import { TaskEither, tryCatch } from 'fp-ts/lib/TaskEither';
-import EventEmitter, { Abortable } from 'node:events';
-import { Stream } from 'node:stream';
+import {
+	FileHandle,
+	FlagAndOpenMode
+} from 'node:fs/promises';
+import EventEmitter, {
+	Abortable
+} from 'node:events';
+import {
+	Stream
+} from 'node:stream';
+import {
+	TaskEither,
+	tryCatch
+} from 'fp-ts/lib/TaskEither';
 
 const toError = (
 	error: unknown,
 	defaultMessage: string
 ) => error instanceof Error ? error : Error(defaultMessage);
 
-const access = (
+export const access = (
 	path: PathLike,
 	mode?: number
 ): TaskEither<Error, void> => tryCatch(
@@ -18,7 +43,7 @@ const access = (
 	(reason: unknown) => toError(reason, "Unexpected error while accessing path")
 );
 
-const appendFile = (
+export const appendFile = (
 	path: PathLike | fsPromises.FileHandle,
 	data: string | Uint8Array,
 	options?: (ObjectEncodingOptions & FlagAndOpenMode) | BufferEncoding | null
@@ -27,7 +52,7 @@ const appendFile = (
 	(reason: unknown) => toError(reason, "Unexpected error appending file")
 );
 
-const chmod = (
+export const chmod = (
 	path: PathLike,
 	mode: Mode
 ): TaskEither<Error, void> => tryCatch(
@@ -35,7 +60,7 @@ const chmod = (
 	(reason: unknown) => toError(reason, "Unexpected error while performing chmod")
 );
 
-const chown = (
+export const chown = (
 	path: PathLike,
 	uid: number,
 	gid: number
@@ -44,7 +69,7 @@ const chown = (
 	(reason: unknown) => toError(reason, "Unexpected error while performing chown")
 );
 
-const copyFile = (
+export const copyFile = (
 	src: PathLike,
 	dest: PathLike,
 	mode?: number
@@ -53,7 +78,7 @@ const copyFile = (
 	(reason: unknown) => toError(reason, "Unexpected error copying file")
 );
 
-const cp = (
+export const cp = (
 	src: string,
 	dest: string,
 	opts?: CopyOptions
@@ -62,7 +87,7 @@ const cp = (
 	(reason: unknown) => toError(reason, "Unexpected error during cp")
 );
 
-const lchown = (
+export const lchown = (
 	path: PathLike,
 	uid: number,
 	gid: number
@@ -71,16 +96,16 @@ const lchown = (
 	(reason: unknown) => toError(reason, "Unexpected error duriong lchown")
 );
 
-const lutimes = (
+export const lutimes = (
 	path: PathLike,
-	atime: string|number|Date,
-	mtime: string|number|Date,
+	atime: string | number | Date,
+	mtime: string | number | Date,
 ): TaskEither<Error, void> => tryCatch(
 	() => fsPromises.lutimes(path, atime, mtime),
 	(reason: unknown) => toError(reason, "Unexpected error during lutimes")
 );
 
-const link = (
+export const link = (
 	existingPath: PathLike,
 	newPath: PathLike
 ): TaskEither<Error, void> => tryCatch(
@@ -88,7 +113,7 @@ const link = (
 	(reason: unknown) => toError(reason, "Unexpected error during link")
 );
 
-const lstat = (
+export const lstat = (
 	path: PathLike,
 	options?: StatOptions & { bigint?: false }
 ): TaskEither<Error, Stats> => tryCatch(
@@ -96,7 +121,7 @@ const lstat = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const mkdir = (
+export const mkdir = (
 	path: PathLike,
 	options?: Mode | (MakeDirectoryOptions & { recursive?: false })
 ): TaskEither<Error, void> => tryCatch(
@@ -104,7 +129,7 @@ const mkdir = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const mkdtemp = (
+export const mkdtemp = (
 	prefix: string,
 	options?: ObjectEncodingOptions | BufferEncoding
 ): TaskEither<Error, string> => tryCatch(
@@ -112,7 +137,7 @@ const mkdtemp = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const open = (
+export const open = (
 	path: PathLike,
 	flags?: string | number,
 	mode?: Mode
@@ -121,7 +146,7 @@ const open = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const opendir = (
+export const opendir = (
 	path: PathLike,
 	options?: OpenDirOptions
 ): TaskEither<Error, Dir> => tryCatch(
@@ -129,23 +154,23 @@ const opendir = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const readdir = (
+export const readdir = (
 	path: PathLike,
 	options?: BufferEncoding | (ObjectEncodingOptions & { withFileTypes?: false })
-): TaskEither<Error, string[]|Buffer[]|Dirent[]> => tryCatch(
+): TaskEither<Error, string[] | Buffer[] | Dirent[]> => tryCatch(
 	() => fsPromises.readdir(path, options),
 	(reason: unknown) => toError(reason, "")
 );
 
-const readFile = (
-	path: PathLike|FileHandle,
+export const readFile = (
+	path: PathLike | FileHandle,
 	options?: ({ encoding?: null, flag?: OpenMode } & EventEmitter.Abortable)
-): TaskEither<Error, Buffer|string> => tryCatch(
+): TaskEither<Error, Buffer | string> => tryCatch(
 	() => fsPromises.readFile(path, options),
 	(reason: unknown) => toError(reason, "")
 );
 
-const readLink = (
+export const readLink = (
 	path: PathLike,
 	options?: ObjectEncodingOptions | BufferEncoding
 ): TaskEither<Error, string> => tryCatch(
@@ -153,15 +178,15 @@ const readLink = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const realpath = (
+export const realpath = (
 	path: PathLike,
 	options?: ObjectEncodingOptions | BufferEncoding
-): TaskEither<Error, string|Buffer> => tryCatch(
+): TaskEither<Error, string | Buffer> => tryCatch(
 	() => fsPromises.realpath(path, options),
 	(reason: unknown) => toError(reason, "")
 );
 
-const rename = (
+export const rename = (
 	oldPath: PathLike,
 	newPath: PathLike
 ): TaskEither<Error, void> => tryCatch(
@@ -169,7 +194,7 @@ const rename = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const rmdir = (
+export const rmdir = (
 	path: PathLike,
 	options?: RmDirOptions
 ): TaskEither<Error, void> => tryCatch(
@@ -177,7 +202,7 @@ const rmdir = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const rm = (
+export const rm = (
 	path: PathLike,
 	options?: RmOptions
 ): TaskEither<Error, void> => tryCatch(
@@ -185,24 +210,24 @@ const rm = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const stat = (
+export const stat = (
 	path: PathLike,
 	options?: (StatOptions & { bigint?: false })
-): TaskEither<Error, Stats|BigIntStats> => tryCatch(
+): TaskEither<Error, Stats | BigIntStats> => tryCatch(
 	() => fsPromises.stat(path, options),
 	(reason: unknown) => toError(reason, "")
 );
 
-const symlink = (
+export const symlink = (
 	target: PathLike,
 	path: PathLike,
-	type?: 'dir'|'file'|'junction'
+	type?: 'dir' | 'file' | 'junction'
 ): TaskEither<Error, void> => tryCatch(
 	() => fsPromises.symlink(target, path, type),
 	(reason: unknown) => toError(reason, "")
 );
 
-const truncate = (
+export const truncate = (
 	path: PathLike,
 	length?: number
 ): TaskEither<Error, void> => tryCatch(
@@ -210,17 +235,17 @@ const truncate = (
 	(reason: unknown) => toError(reason, "")
 );
 
-const unlink = (
+export const unlink = (
 	path: PathLike
 ): TaskEither<Error, void> => tryCatch(
 	() => fsPromises.unlink(path),
 	(reason: unknown) => toError(reason, "")
 );
 
-const utimes = (
+export const utimes = (
 	path: PathLike,
-	atime: string|number|Date,
-	mtime: string| number|Date
+	atime: string | number | Date,
+	mtime: string | number | Date
 ): TaskEither<Error, void> => tryCatch(
 	() => fsPromises.utimes(path, atime, mtime),
 	(reason: unknown) => toError(reason, "")
@@ -235,7 +260,7 @@ const watch = (
 	(reason: unknown) => toError(reason, "")
 )*/
 
-const writeFile = (
+export const writeFile = (
 	file: PathLike | FileHandle,
 	data: string | NodeJS.ArrayBufferView | Iterable<string | NodeJS.ArrayBufferView> | AsyncIterable<string | NodeJS.ArrayBufferView> | Stream,
 	options?: BufferEncoding | (ObjectEncodingOptions & { mode?: Mode, flag?: OpenMode } & Abortable)
