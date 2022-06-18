@@ -35,28 +35,61 @@ const toError = (
 	defaultMessage: string
 ) => error instanceof Error ? error : Error(defaultMessage);
 
-export const access = (
-	path: PathLike,
+/**
+ * Tests a user's permissions for the file or directory specified by `path`.
+ * The `mode` argumnet should be either the value `fs.constants.F_OK` or a mask consisting of the
+ * bitwise OR of any of `fs.constants.R_OK`,`fs.constants.W_OK`, and `fs.constants.X_OK`
+ * (e.g.`fs.constants.W_OK | fs.constants.R_OK`).
+ * Check `File access constants` for possible values of `mode`.
+ * @see https://nodejs.org/api/fs.html#fspromisesaccesspath-mode
+ * 
+ * @param path File or directory path to test permissions.
+ * @param mode Integer that specifies the accessibility checks to be performed.
+ * @returns TaskEither that yields the path, or fails yielding an Error
+ */
+export const access = <T extends PathLike>(
+	path: T,
 	mode?: number
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.access(path, mode),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.access(path, mode).then(() => path),
 	(reason: unknown) => toError(reason, "Unexpected error while accessing path")
 );
 
-export const appendFile = (
-	path: PathLike | fsPromises.FileHandle,
-	data: string | Uint8Array,
-	options?: (ObjectEncodingOptions & FlagAndOpenMode) | BufferEncoding | null
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.appendFile(path, data, options),
+/**
+ * Asynchronously append data to a file, creating the file if it does not yet exist.
+ * `data` can be a string or a `Buffer`. If `options` is a string, then it specifies the `encoding`.
+ * The `mode` option only affects the newly created file. See `fs.open()` for more details.
+ * The `path` may be specified as a `FileHandle` that has been opened for appending (using `fsPromises.open()`).
+ * @see https://nodejs.org/api/fs.html#fspromisesappendfilepath-data-options
+ * 
+ * @param path File to append to
+ * @param data Data to append to the file
+ * @param options Append options
+ * @returns TaskEither that yields the path, or fails yielding an Error
+ */
+export const appendFile = <T extends (PathLike | FileHandle)>(
+	path: T,
+	data: string | Buffer,
+	options?: (ObjectEncodingOptions & FlagAndOpenMode) | BufferEncoding
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.appendFile(path, data, options).then(() => path),
 	(reason: unknown) => toError(reason, "Unexpected error appending file")
 );
 
-export const chmod = (
-	path: PathLike,
+/**
+ * Changes the permissions of a file.
+ * See the POSIX [`chmod(2)`](https://man7.org/linux/man-pages/man2/chmod.2.html) documentation for more detail.
+ * @see https://nodejs.org/api/fs.html#fspromiseschmodpath-mode
+ * 
+ * @param path File to change permissions of
+ * @param mode Numerical bitmask [`File modes`](https://nodejs.org/api/fs.html#file-modes) 
+ * @returns TaskEither that yields the path, or fails yielding an Error
+ */
+export const chmod = <T extends PathLike>(
+	path: T,
 	mode: Mode
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.chmod(path, mode),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.chmod(path, mode).then(() => path),
 	(reason: unknown) => toError(reason, "Unexpected error while performing chmod")
 );
 
