@@ -93,56 +93,124 @@ export const chmod = <T extends PathLike>(
 	(reason: unknown) => toError(reason, "Unexpected error while performing chmod")
 );
 
-export const chown = (
-	path: PathLike,
+/**
+ * Changes the owner and group of a file.
+ * See the POSIX [`chown(2)`](http://man7.org/linux/man-pages/man2/chown.2.html) documentation for more detail.
+ * @see https://nodejs.org/api/fs.html#fspromiseschownpath-uid-gid
+ * 
+ * @param path File to change ownership of.
+ * @param uid Integer that denotes the user id that corresponds to the owner to be set. 
+ * @param gid Integer that denotes the group id that corresponds to the group to be set.
+ * @returns TaskEither that yields the path, or fails yielding an Error
+ */
+export const chown = <T extends PathLike>(
+	path: T,
 	uid: number,
 	gid: number
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.chown(path, uid, gid),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.chown(path, uid, gid).then(() => path),
 	(reason: unknown) => toError(reason, "Unexpected error while performing chown")
 );
 
-export const copyFile = (
+/**
+ * Asynchronously copies `src` to `dest`.
+ * By default, `dest` is overwritten if italready exists.
+ * 
+ * No guarantees are made about the atomicity of the copy operation.
+ * If an error occurs after the destination file has been opened for writing, an attempt will be
+ * made to remove the destination.
+ * @see https://nodejs.org/api/fs.html#fspromisescopyfilesrc-dest-mode
+ * 
+ * @param src Source file to copy.
+ * @param dest Destination file of the copy operation.
+ * @param mode Optional modifiers that specify the behavior of the copy operation.
+ * @returns TaskEither that yields the destination path, or fails yielding an Error.
+ */
+export const copyFile = <T extends PathLike>(
 	src: PathLike,
-	dest: PathLike,
+	dest: T,
 	mode?: number
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.copyFile(src, dest, mode),
-	(reason: unknown) => toError(reason, "Unexpected error copying file")
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.copyFile(src, dest, mode).then(() => dest),
+	(reason: unknown) => toError(reason, "Unexpected error during copyFile")
 );
 
+/**
+ * Asynchronously copies the entire directory structure from `src` to `dest`, including 
+ * subdirectories and files.
+ * 
+ * When copying a directory to another directory, globs are not supported and behavior is similar 
+ * to `cp dir1/ dir2/`.
+ * @see https://nodejs.org/api/fs.html#fspromisescpsrc-dest-options
+ * @experimental
+ * 
+ * @param src Source path to copy.
+ * @param dest Destination path to copy to.
+ * @param opts Copy options that specify the behavior of this operation.
+ * @returns TaskEither that yields the destination path, or fails yielding an Error.
+ */
 export const cp = (
 	src: string,
 	dest: string,
 	opts?: CopyOptions
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.cp(src, dest, opts),
+): TaskEither<Error, string> => tryCatch(
+	() => fsPromises.cp(src, dest, opts).then(() => dest),
 	(reason: unknown) => toError(reason, "Unexpected error during cp")
 );
 
-export const lchown = (
-	path: PathLike,
+/**
+ * Changes the owner and group on a symbolic link.
+ * @see https://nodejs.org/api/fs.html#fspromiseslchownpath-uid-gid
+ * 
+ * @param path Symbolic link to change ownership of.
+ * @param uid Integer that denotes the user id that corresponds to the owner to be set. 
+ * @param gid Integer that denotes the group id that corresponds to the group to be set. 
+ * @returns TaskEither that yields the path, or fails yielding an Error.
+ */
+export const lchown = <T extends PathLike>(
+	path: T,
 	uid: number,
 	gid: number
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.lchown(path, uid, gid),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.lchown(path, uid, gid).then(() => path),
 	(reason: unknown) => toError(reason, "Unexpected error duriong lchown")
 );
 
-export const lutimes = (
-	path: PathLike,
+/**
+ * Changes the access and modification times of a file in the same way as `fsPromises.utimes()`,
+ * with the difference that if the path refers to a symbolic link, then the link is not 
+ * dereferenced: instead, the timestamps of the symbolic link itself are changed.
+ * @see https://nodejs.org/api/fs.html#fspromiseslutimespath-atime-mtime
+ * 
+ * @param path File or symbolic link to change access and modification times of.
+ * @param atime Access time.
+ * @param mtime Modification time.
+ * @returns TaskEither that yields the path, or fails yielding an Error.
+ */
+export const lutimes = <T extends PathLike>(
+	path: T,
 	atime: string | number | Date,
 	mtime: string | number | Date,
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.lutimes(path, atime, mtime),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.lutimes(path, atime, mtime).then(() => path),
 	(reason: unknown) => toError(reason, "Unexpected error during lutimes")
 );
 
-export const link = (
+/**
+ * Creates a new link from the `existingPath` to the `newPath`.
+ * See the POSIX [`link(2)`](http://man7.org/linux/man-pages/man2/link.2.html) documentation for 
+ * more detail.
+ * @see https://nodejs.org/api/fs.html#fspromiseslinkexistingpath-newpath
+ * 
+ * @param existingPath Existing path to create a link from.
+ * @param newPath Path to create the link to.
+ * @returns TaskEither that yields the new path, or fails yielding an Error.
+ */
+export const link = <T extends PathLike>(
 	existingPath: PathLike,
-	newPath: PathLike
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.link(existingPath, newPath),
+	newPath: T
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.link(existingPath, newPath).then(() => newPath),
 	(reason: unknown) => toError(reason, "Unexpected error during link")
 );
 
