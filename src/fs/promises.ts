@@ -348,6 +348,23 @@ export const readdir = (
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * Asynchronously reads the entire contents of a file.
+ * 
+ * If no encoding is specified (using `options.encoding`), the data is returned as a `Buffer` object.
+ * Otherwise, the data will be a string.
+ * If `options` is a string, then it specifies the encoding.
+ * When the `path` is a directory, the behavior of `fsPromises.readFile()` is platform-specific. 
+ * On macOS, Linux, and Windows, the promise will be rejected with an error.
+ * On FreeBSD, a representation of the directory's contents will be returned.
+ * It is possible to abort an ongoing `readFile` using an `AbortSignal`.
+ * If a request is aborted the promise returned is rejected with an `AbortError`:
+ * @see https://nodejs.org/api/fs.html#fspromisesreadfilepath-options
+ * 
+ * @param path Filename or `FileHandle`.
+ * @param options Read file options.
+ * @returns TaskEither that yields the Buffer or string representing the data of the file, or fails yielding an Error.
+ */
 export const readFile = (
 	path: PathLike | FileHandle,
 	options?: ({ encoding?: null, flag?: OpenMode } & EventEmitter.Abortable)
@@ -356,14 +373,49 @@ export const readFile = (
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * Reads the contents of the symbolic link referred to by `path`.
+ * See the POSIX [`readlink(2)`](http://man7.org/linux/man-pages/man2/readlink.2.html) documentation
+ * for more detail. 
+ * The promise is resolved with the`linkString` upon success.
+ * 
+ * The optional `options` argument can be a string specifying an encoding, or an object with an
+ * `encoding` property specifying the character encoding to use for the link path returned.
+ * If the `encoding` is set to `'buffer'`, the link path returned will be passed as a `Buffer`
+ * object.
+ * @see https://nodejs.org/api/fs.html#fspromisesreadlinkpath-options
+ * 
+ * @param path Path of symbolic link to read.
+ * @param options Encoding options.
+ * @returns TaskEither that yields the string or Buffer object that contains the symbolic link's string value, or fails yielding an Error.
+ */
 export const readLink = (
 	path: PathLike,
 	options?: ObjectEncodingOptions | BufferEncoding
-): TaskEither<Error, string> => tryCatch(
+): TaskEither<Error, string|Buffer> => tryCatch(
 	() => fsPromises.readlink(path, options),
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * Determines the actual location of `path` using the same semantics as the`fs.realpath.native()`
+ * function.
+ * See the POSIX [`realpath(3)`](https://man7.org/linux/man-pages/man3/realpath.3.html)
+ * documentation for more detail.
+ * Only paths that can be converted to UTF8 strings are supported.
+ * 
+ * The optional `options` argument can be a string specifying an encoding, or an object with an
+ * `encoding` property specifying the character encoding to use for the path.
+ * If the `encoding` is set to `'buffer'`, the path returned will be passed as a `Buffer` object.
+ * 
+ * On Linux, when Node.js is linked against musl libc, the procfs file system must be mounted on
+ * `/proc` in order for this function to work. Glibc does not have this restriction.
+ * @see https://nodejs.org/api/fs.html#fspromisesrealpathpath-options
+ * 
+ * @param path Path to be resolved.
+ * @param options Realpath options.
+ * @returns TaskEither that yields the string or Buffer of the actual location of `path`, or fails yielding an Error.
+ */
 export const realpath = (
 	path: PathLike,
 	options?: ObjectEncodingOptions | BufferEncoding
@@ -372,14 +424,37 @@ export const realpath = (
 	(reason: unknown) => toError(reason, "")
 );
 
-export const rename = (
+/**
+ * Asynchronously renames `oldPath` to `newPath`.
+ * This will overwrite the destinations file if it exists.
+ * @see https://nodejs.org/api/fs.html#fspromisesrenameoldpath-newpath
+ * 
+ * @param oldPath Path to rename.
+ * @param newPath New file path.
+ * @returns TaskEither that yields the `newPath`, or fails yielding an Error.
+ */
+export const rename = <T extends PathLike>(
 	oldPath: PathLike,
-	newPath: PathLike
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.rename(oldPath, newPath),
+	newPath: T
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.rename(oldPath, newPath).then(() => newPath),
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * Removes the directory identified by `path`.
+ * 
+ * Using `fsPromises.rmdir()` on a file (not a directory) results in the promise being rejected with
+ * an `ENOENT` error on Windows and an `ENOTDIR` error on POSIX.
+ * 
+ * To get a behavior similar to the `rm -rf` Unix command, use `fsPromises.rm()` with options
+ * `{ recursive: true, force: true }`.
+ * @see https://nodejs.org/api/fs.html#fspromisesrmdirpath-options
+ * 
+ * @param path Path of directory to remove.
+ * @param options rmdir options.
+ * @returns TaskEither that yields void, or fails yielding an Error.
+ */
 export const rmdir = (
 	path: PathLike,
 	options?: RmDirOptions
@@ -388,6 +463,14 @@ export const rmdir = (
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * Removes files and directories (modeled on the standard POSIX `rm` utility).
+ * @see https://nodejs.org/api/fs.html#fspromisesrmpath-options
+ * 
+ * @param path Path to remove.
+ * @param options rm options.
+ * @returns TaskEither that yields void, or fails yielding an Error.
+ */
 export const rm = (
 	path: PathLike,
 	options?: RmOptions
@@ -396,6 +479,14 @@ export const rm = (
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * Retrieves informations about the given file or directory.
+ * @see https://nodejs.org/api/fs.html#fspromisesstatpath-options
+ * 
+ * @param path Path to stat.
+ * @param options Stat options.
+ * @returns TaskEither that yields the Stats, or fails yielding an Error.
+ */
 export const stat = (
 	path: PathLike,
 	options?: (StatOptions & { bigint?: false })
@@ -404,12 +495,27 @@ export const stat = (
 	(reason: unknown) => toError(reason, "")
 );
 
-export const symlink = (
+/**
+ * Creates a symbolic link.
+ * This creates a link making the path point to the target.
+ * 
+ * The `type` argument is only used on Windows platforms and can be one of `'dir'`,`'file'`, or 
+ * `'junction'`.
+ * Windows junction points require the destination path to be absolute.
+ * When using `'junction'`, the `target` argument will automatically be normalized to absolute path.
+ * @see https://nodejs.org/api/fs.html#fspromisessymlinktarget-path-type
+ * 
+ * @param target Path to which the symlink has to be created.
+ * @param path Path to where the symlink will be created
+ * @param type Represents the type of symlink to be created.
+ * @returns TaskEither that yields the `path` where the symlink was created, or fails yielding an Error.
+ */
+export const symlink = <T extends PathLike>(
 	target: PathLike,
-	path: PathLike,
+	path: T,
 	type?: 'dir' | 'file' | 'junction'
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.symlink(target, path, type),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.symlink(target, path, type).then(() => path),
 	(reason: unknown) => toError(reason, "")
 );
 
@@ -438,6 +544,9 @@ export const utimes = (
 );
 
 /*
+	TODO:
+		Currently not sure how to handle AsyncIterable
+
 const watch = (
 	filename: PathLike,
 	options?: BufferEncoding | WatchOptions
@@ -445,6 +554,7 @@ const watch = (
 	() => fsPromises.watch(filename, options),
 	(reason: unknown) => toError(reason, "")
 )*/
+
 
 export const writeFile = (
 	file: PathLike | FileHandle,
