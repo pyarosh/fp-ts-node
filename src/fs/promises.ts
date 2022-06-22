@@ -519,14 +519,38 @@ export const symlink = <T extends PathLike>(
 	(reason: unknown) => toError(reason, "")
 );
 
-export const truncate = (
-	path: PathLike,
+/**
+ * Truncates (shortens or extends the length) of the content at `path` to `len` bytes.
+ * 
+ * Modifies the inner contents of a file by `len` bytes.
+ * If `len` is shorter than the file's current length, the file is truncated to that length of `len`
+ * and if it is greater then the file length is padded by appending null bytes (x00) until `len` is
+ * reached.
+ * @see https://nodejs.org/api/fs.html#fspromisestruncatepath-len
+ * 
+ * @param path Path of file to truncate.
+ * @param length Number of bytes.
+ * @returns TaskEither that yeilds the `path`, or fails yielding an Error.
+ */
+export const truncate = <T extends PathLike>(
+	path: T,
 	length?: number
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.truncate(path, length),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.truncate(path, length).then(() => path),
 	(reason: unknown) => toError(reason, "")
 );
 
+/**
+ * If `path` refers to a symbolic link, then the link is removed without affecting the file or
+ * directory to which that link refers.
+ * If the `path` refers to a file path that is not a symbolic link, the file is deleted.
+ * See the POSIX [`unlink(2)`](http://man7.org/linux/man-pages/man2/unlink.2.html) documentation for
+ * more detail.
+ * @see https://nodejs.org/api/fs.html#fspromisesunlinkpath
+ * 
+ * @param path Path of file or symbolic link to remove.
+ * @returns TaskEither that yields void, or fails yielding an Error.
+ */
 export const unlink = (
 	path: PathLike
 ): TaskEither<Error, void> => tryCatch(
@@ -534,12 +558,27 @@ export const unlink = (
 	(reason: unknown) => toError(reason, "")
 );
 
-export const utimes = (
-	path: PathLike,
+/**
+ * Change the file system timestamps of the object referenced by `path`.
+ * 
+ * The `atime` and `mtime` arguments follow these rules:
+ * * Values can be either numbers representing Unix epoch time, `Date`s, or a
+ * numeric string like `'123456789.0'`.
+ * * If the value can not be converted to a number, or is `NaN`, `Infinity` or`-Infinity`, the 
+ * TaskEither will yield an `Error`.
+ * @see https://nodejs.org/api/fs.html#fspromisesutimespath-atime-mtime
+ * 
+ * @param path File or symbolic link to change access and modification times of. 
+ * @param atime Access time.
+ * @param mtime Modification time.
+ * @returns TaskEither that yields the `path`, or fails yielding an Error.
+ */
+export const utimes = <T extends PathLike>(
+	path: T,
 	atime: string | number | Date,
 	mtime: string | number | Date
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.utimes(path, atime, mtime),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.utimes(path, atime, mtime).then(() => path),
 	(reason: unknown) => toError(reason, "")
 );
 
@@ -555,12 +594,42 @@ const watch = (
 	(reason: unknown) => toError(reason, "")
 )*/
 
-
-export const writeFile = (
-	file: PathLike | FileHandle,
+/**
+ * Asynchronously writes data to a file, replacing the file if it already exists.
+ * `data` can be a string, a buffer, an:
+ * * [AsyncIterable](https://tc39.github.io/ecma262/#sec-asynciterable-interface) or
+ * * [Iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#The_iterable_protocol) object.
+ *
+ * The `encoding` option is ignored if `data` is a buffer.
+ *
+ * If `options` is a string, then it specifies the encoding.
+ *
+ * The `mode` option only affects the newly created file. See `fs.open()` for more details.
+ *
+ * Any specified `FileHandle` has to support writing.
+ *
+ * It is unsafe to use `fsPromises.writeFile()` multiple times on the same file
+ * without waiting for the promise to be settled.
+ *
+ * Similarly to `fsPromises.readFile` \- `fsPromises.writeFile` is a convenience
+ * method that performs multiple `write` calls internally to write the buffer
+ * passed to it. For performance sensitive code consider using `fs.createWriteStream()` or `filehandle.createWriteStream()`.
+ *
+ * It is possible to use an `AbortSignal` to cancel an `fsPromises.writeFile()`.
+ * Cancelation is "best effort", and some amount of data is likely still
+ * to be written.
+ * @see https://nodejs.org/api/fs.html#fspromiseswritefilefile-data-options
+ * 
+ * @param file Path or `FileHandle` of the file to write to.
+ * @param data Data to write to the file.
+ * @param options Write options.
+ * @returns TaskEither that yields `file`, or fails yielding an Error.
+ */
+export const writeFile = <T extends (PathLike | FileHandle)>(
+	file: T,
 	data: string | NodeJS.ArrayBufferView | Iterable<string | NodeJS.ArrayBufferView> | AsyncIterable<string | NodeJS.ArrayBufferView> | Stream,
 	options?: BufferEncoding | (ObjectEncodingOptions & { mode?: Mode, flag?: OpenMode } & Abortable)
-): TaskEither<Error, void> => tryCatch(
-	() => fsPromises.writeFile(file, data, options),
+): TaskEither<Error, T> => tryCatch(
+	() => fsPromises.writeFile(file, data, options).then(() => file),
 	(reason: unknown) => toError(reason, "")
 );
