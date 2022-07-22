@@ -342,7 +342,7 @@ export const opendir = (
  */
 export const readdir = (
 	path: PathLike,
-	options?: BufferEncoding | (ObjectEncodingOptions & { withFileTypes?: false })
+	options?: BufferEncoding | (ObjectEncodingOptions & { withFileTypes?: true })
 ): TaskEither<Error, string[] | Buffer[] | Dirent[]> => tryCatch(
 	() => fsPromises.readdir(path, options),
 	(reason: unknown) => toError(reason, "")
